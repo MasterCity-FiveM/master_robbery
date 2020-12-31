@@ -15,7 +15,7 @@ AddEventHandler('master_robbery:pedDead', function(store)
         local wait = cooldown.hour * hour + cooldown.minute * minute + cooldown.second * second
         Wait(wait)
         if not Config.Shops[store].robbed then
-            for k, v in pairs(deadPeds) do if k == store then table.remove(deadPeds, k) end end
+            for k, v in pairs(deadPeds) do if k == store and deadPeds[k] ~= nil then table.remove(deadPeds, k) end end
             TriggerClientEvent('master_robbery:resetStore', -1, store)
         end
     end
@@ -48,7 +48,7 @@ ESX.RegisterServerCallback('master_robbery:canRob', function(source, cb, store)
 		else
 			cb('no_cops')
 		end
-	end,'police')
+	end, Config.Shops[store].organ)
 end)
 
 RegisterServerEvent('master_robbery:rob')
@@ -68,7 +68,11 @@ AddEventHandler('master_robbery:rob', function(store)
     local wait = cooldown.hour * hour + cooldown.minute * minute + cooldown.second * second
     Wait(wait)
     Config.Shops[store].robbed = false
-    for k, v in pairs(deadPeds) do if k == store then table.remove(deadPeds, k) end end
+    for k, v in pairs(deadPeds) do 
+		if k == store and deadPeds[k] ~= nil then
+			table.remove(deadPeds, k) 
+		end 
+	end
     TriggerClientEvent('master_robbery:resetStore', -1, store)
 end)
 

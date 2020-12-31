@@ -34,15 +34,14 @@ AddEventHandler('master_robbery:onPedDeath', function(store)
 end)
 
 RegisterNetEvent('master_robbery:msgPolice')
-AddEventHandler('master_robbery:msgPolice', function()
+AddEventHandler('master_robbery:msgPolice', function(phone)
 	local playerPed = PlayerPedId()
 	PedPosition		= GetEntityCoords(playerPed)
 	local PlayerCoords = { x = PedPosition.x, y = PedPosition.y, z = PedPosition.z }
 
 	exports.pNotify:SendNotification({text = "یک نفر دزدی شما رو به پلیس گزارش داده!", type = "error", timeout = 4000})
 
-    TriggerServerEvent('esx_addons_gcphone:startCall', 'police', 'یک دزدی گزارش شده!', PlayerCoords, {
-
+    TriggerServerEvent('esx_addons_gcphone:startCall', phone, 'یک دزدی گزارش شده!', PlayerCoords, {
 		PlayerCoords = { x = PedPosition.x, y = PedPosition.y, z = PedPosition.z },
 	})
 end)
@@ -233,7 +232,7 @@ Citizen.CreateThread(function()
                                 loadDict('missheist_agency2ahands_up')
                                 TaskPlayAnim(peds[i], "missheist_agency2ahands_up", "handsup_anxious", 8.0, -8.0, -1, 1, 0, false, false, false)
 								
-								TriggerEvent('master_robbery:msgPolice')
+								TriggerEvent('master_robbery:msgPolice', Config.Shops[i].organ)
                                 local scared = 0
 								
                                 while scared < 100 and not IsPedDeadOrDying(peds[i]) and GetDistanceBetweenCoords(GetEntityCoords(me), GetEntityCoords(peds[i]), true) <= 7.5 do
@@ -268,7 +267,11 @@ Citizen.CreateThread(function()
 									exports.pNotify:SendNotification({text = "فروشنده: آخیش رفت، اینا هم مارو مسخره کردن!", type = "info", timeout = 4000})
                                 end
                             elseif canRob == 'no_cops' then
-								exports.pNotify:SendNotification({text = "تعداد پلیس ها کم می باشد!", type = "error", timeout = 4000})
+								if Config.Shops[i].organ == 'sheriff' then
+									exports.pNotify:SendNotification({text = "تعداد شریف ها کم می باشد!", type = "error", timeout = 4000})
+								else
+									exports.pNotify:SendNotification({text = "تعداد پلیس ها کم می باشد!", type = "error", timeout = 4000})
+								end
 		
                                 local wait = GetGameTimer()+4000
                                 while wait >= GetGameTimer() do
