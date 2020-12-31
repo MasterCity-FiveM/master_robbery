@@ -273,13 +273,10 @@ Citizen.CreateThread(function()
 									exports.pNotify:SendNotification({text = "تعداد پلیس ها کم می باشد!", type = "error", timeout = 4000})
 								end
 		
-                                local wait = GetGameTimer()+4000
-                                while wait >= GetGameTimer() do
-                                    Wait(0)
-                                end
+                                Wait(4500)
                             else
 								exports.pNotify:SendNotification({text = "فروشنده: برو بابا، دیر اومدی نخواه زود برو! قبل تو زرنگ ترهاش مغازه رو زدن، پول نیست!", type = "info", timeout = 4000})
-                                Wait(4000)
+                                Wait(4500)
                             end
                         end
                     end
