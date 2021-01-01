@@ -7,17 +7,8 @@ RegisterServerEvent('master_robbery:pedDead')
 AddEventHandler('master_robbery:pedDead', function(store)
     if not deadPeds[store] then
         deadPeds[store] = 'deadlol'
+		Config.Shops[store].lastrobbed = os.time()
         TriggerClientEvent('master_robbery:onPedDeath', -1, store)
-        local second = 1000
-        local minute = 60 * second
-        local hour = 60 * minute
-        local cooldown = Config.Shops[store].cooldown
-        local wait = cooldown.hour * hour + cooldown.minute * minute + cooldown.second * second
-        Wait(wait)
-        if not Config.Shops[store].robbed then
-            for k, v in pairs(deadPeds) do if k == store and deadPeds[k] ~= nil then table.remove(deadPeds, k) end end
-            TriggerClientEvent('master_robbery:resetStore', -1, store)
-        end
     end
 end)
 
@@ -40,10 +31,11 @@ ESX.RegisterServerCallback('master_robbery:canRob', function(source, cb, store)
 	
 	TriggerEvent('esx_service:GetServiceCount',  function(cops)
 		if cops >= Config.Shops[store].cops then
-			if not Config.Shops[store].robbed and not deadPeds[store] then
-				cb(true)
-			else
+			if ((os.time() - Config.Shops[store].lastrobbed) < Config.Shops[store].cooldown and Config.Shops[store].lastrobbed ~= 0) or deadPeds[store] then
 				cb(false)
+			else
+				Config.Shops[store].lastrobbed = os.time()
+				cb(true)
 			end
 		else
 			cb('no_cops')
@@ -54,31 +46,25 @@ end)
 RegisterServerEvent('master_robbery:rob')
 AddEventHandler('master_robbery:rob', function(store)
     local src = source
-    Config.Shops[store].robbed = true
     local xPlayer = ESX.GetPlayerFromId(src)
 	
     TriggerClientEvent('master_robbery:rob', -1, store)
     Wait(30000)
     TriggerClientEvent('master_robbery:robberyOver', src)
-
-    local second = 1000
-    local minute = 60 * second
-    local hour = 60 * minute
-    local cooldown = Config.Shops[store].cooldown
-    local wait = cooldown.hour * hour + cooldown.minute * minute + cooldown.second * second
-    Wait(wait)
-    Config.Shops[store].robbed = false
-    for k, v in pairs(deadPeds) do 
-		if k == store and deadPeds[k] ~= nil then
-			table.remove(deadPeds, k) 
-		end 
-	end
-    TriggerClientEvent('master_robbery:resetStore', -1, store)
 end)
 
 Citizen.CreateThread(function()
     while true do
-        for i = 1, #deadPeds do TriggerClientEvent('master_robbery:pedDead', -1, i) end -- update dead peds
-        Citizen.Wait(500)
+		for k, v in pairs(deadPeds) do 
+			if deadPeds[k] ~= nil then
+				if (os.time() - Config.Shops[k].lastrobbed) < Config.Shops[k].cooldown and Config.Shops[k].lastrobbed ~= 0 then
+					TriggerClientEvent('master_robbery:pedDead', -1, i)
+				else
+					table.remove(deadPeds, k)
+					TriggerClientEvent('master_robbery:resetStore', -1, k)
+				end
+			end 
+		end
+        Citizen.Wait(1000)
     end
 end)

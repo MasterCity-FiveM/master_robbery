@@ -211,78 +211,81 @@ Citizen.CreateThread(function()
 
     while true do
         Wait(5)
-        local me = PlayerPedId()
-        if IsPedArmed(me, 7) then
-            if IsPlayerFreeAiming(PlayerId()) then
-                for i = 1, #peds do
-                    if HasEntityClearLosToEntityInFront(me, peds[i], 19) and not IsPedDeadOrDying(peds[i]) and GetDistanceBetweenCoords(GetEntityCoords(me), GetEntityCoords(peds[i]), true) <= 5.0 then
-                        if not robbing then
-                            local canRob = nil
-                            ESX.TriggerServerCallback('master_robbery:canRob', function(cb)
-                                canRob = cb
-                            end, i)
-                            while canRob == nil do
-                                Wait(0)
-                            end
-                            if canRob == true then
-                                robbing = true
-                                Citizen.CreateThread(function()
-                                    while robbing do Wait(0) if IsPedDeadOrDying(peds[i]) then robbing = false end end
-                                end)
-                                loadDict('missheist_agency2ahands_up')
-                                TaskPlayAnim(peds[i], "missheist_agency2ahands_up", "handsup_anxious", 8.0, -8.0, -1, 1, 0, false, false, false)
-								
-								TriggerEvent('master_robbery:msgPolice', Config.Shops[i].organ)
-                                local scared = 0
-								
-                                while scared < 100 and not IsPedDeadOrDying(peds[i]) and GetDistanceBetweenCoords(GetEntityCoords(me), GetEntityCoords(peds[i]), true) <= 7.5 do
-                                    local sleep = Config.Shops[i].rob_time
-                                    SetEntityAnimSpeed(peds[i], "missheist_agency2ahands_up", "handsup_anxious", 1.0)
-                                    if IsPlayerFreeAiming(PlayerId()) then
-                                        sleep = 250
-                                        SetEntityAnimSpeed(peds[i], "missheist_agency2ahands_up", "handsup_anxious", 1.3)
-                                    end
-                                    if IsPedArmed(me, 4) and GetAmmoInClip(me, GetSelectedPedWeapon(me)) > 0 and IsControlPressed(0, 24) then
-                                        sleep = 50
-                                        SetEntityAnimSpeed(peds[i], "missheist_agency2ahands_up", "handsup_anxious", 1.7)
-                                    end
-                                    sleep = GetGameTimer() + sleep
-									
-                                    while sleep >= GetGameTimer() and not IsPedDeadOrDying(peds[i]) do
-                                        Wait(0)
-                                        DrawRect(0.5, 0.5, 0.2, 0.03, 75, 75, 75, 200)
-                                        local draw = scared/500
-                                        DrawRect(0.5, 0.5, draw, 0.03, 0, 221, 255, 200)
-                                    end
-                                    scared = scared + 1
-                                end
-                                if GetDistanceBetweenCoords(GetEntityCoords(me), GetEntityCoords(peds[i]), true) <= 7.5 then
-                                    if not IsPedDeadOrDying(peds[i]) then
-                                        TriggerServerEvent('master_robbery:rob', i)
-                                        while robbing do Wait(0) if IsPedDeadOrDying(peds[i]) then robbing = false end end
-                                    end
-                                else
-                                    ClearPedTasks(peds[i])
-                                    robbing = false
-									exports.pNotify:SendNotification({text = "فروشنده: آخیش رفت، اینا هم مارو مسخره کردن!", type = "info", timeout = 4000})
-                                end
-                            elseif canRob == 'no_cops' then
-								if Config.Shops[i].organ == 'sheriff' then
-									exports.pNotify:SendNotification({text = "تعداد شریف ها کم می باشد!", type = "error", timeout = 4000})
-								else
-									exports.pNotify:SendNotification({text = "تعداد پلیس ها کم می باشد!", type = "error", timeout = 4000})
+		if ESX == nil or ESX.PlayerData == nil or ESX.PlayerData.job == nil or ESX.PlayerData.job.name == nil or (ESX.PlayerData.job.name ~= 'police' and ESX.PlayerData.job.name ~= 'sheriff') then
+			local me = PlayerPedId()
+			if IsPedArmed(me, 7) then
+				if IsPlayerFreeAiming(PlayerId()) then
+					for i = 1, #peds do
+						if HasEntityClearLosToEntityInFront(me, peds[i], 19) and not IsPedDeadOrDying(peds[i]) and GetDistanceBetweenCoords(GetEntityCoords(me), GetEntityCoords(peds[i]), true) <= 5.0 then
+							if not robbing then
+								local canRob = nil
+								ESX.TriggerServerCallback('master_robbery:canRob', function(cb)
+									canRob = cb
+								end, i)
+								while canRob == nil do
+									Wait(0)
 								end
-		
-                                Wait(4500)
-                            else
-								exports.pNotify:SendNotification({text = "فروشنده: برو بابا، دیر اومدی نخواه زود برو! قبل تو زرنگ ترهاش مغازه رو زدن، پول نیست!", type = "info", timeout = 4000})
-                                Wait(4500)
-                            end
-                        end
-                    end
-                end
-            end
-        end
+								if canRob == true then
+									robbing = true
+									Citizen.CreateThread(function()
+										while robbing do Wait(0) if IsPedDeadOrDying(peds[i]) then robbing = false end end
+									end)
+									loadDict('missheist_agency2ahands_up')
+									TaskPlayAnim(peds[i], "missheist_agency2ahands_up", "handsup_anxious", 8.0, -8.0, -1, 1, 0, false, false, false)
+									
+									TriggerEvent('master_robbery:msgPolice', Config.Shops[i].organ)
+									local scared = 0
+									
+									while scared < 100 and not IsPedDeadOrDying(peds[i]) and GetDistanceBetweenCoords(GetEntityCoords(me), GetEntityCoords(peds[i]), true) <= 7.5 do
+										local sleep = Config.Shops[i].rob_time
+										SetEntityAnimSpeed(peds[i], "missheist_agency2ahands_up", "handsup_anxious", 1.0)
+										if IsPlayerFreeAiming(PlayerId()) then
+											sleep = 250
+											SetEntityAnimSpeed(peds[i], "missheist_agency2ahands_up", "handsup_anxious", 1.3)
+										end
+										if IsPedArmed(me, 4) and GetAmmoInClip(me, GetSelectedPedWeapon(me)) > 0 and IsControlPressed(0, 24) then
+											sleep = 50
+											SetEntityAnimSpeed(peds[i], "missheist_agency2ahands_up", "handsup_anxious", 1.7)
+										end
+										sleep = GetGameTimer() + sleep
+										
+										while sleep >= GetGameTimer() and not IsPedDeadOrDying(peds[i]) do
+											Wait(0)
+											DrawRect(0.5, 0.5, 0.2, 0.03, 75, 75, 75, 200)
+											local draw = scared/500
+											DrawRect(0.5, 0.5, draw, 0.03, 0, 221, 255, 200)
+										end
+										scared = scared + 1
+									end
+									if GetDistanceBetweenCoords(GetEntityCoords(me), GetEntityCoords(peds[i]), true) <= 7.5 then
+										if not IsPedDeadOrDying(peds[i]) then
+											TriggerServerEvent('master_robbery:rob', i)
+											while robbing do Wait(0) if IsPedDeadOrDying(peds[i]) then robbing = false end end
+										end
+									else
+										ClearPedTasks(peds[i])
+										robbing = false
+										exports.pNotify:SendNotification({text = "فروشنده: آخیش رفت، اینا هم مارو مسخره کردن!", type = "info", timeout = 4000})
+									end
+								elseif canRob == 'no_cops' then
+									if Config.Shops[i].organ == 'sheriff' then
+										exports.pNotify:SendNotification({text = "تعداد شریف ها کم می باشد!", type = "error", timeout = 4000})
+									else
+										exports.pNotify:SendNotification({text = "تعداد پلیس ها کم می باشد!", type = "error", timeout = 4000})
+									end
+			
+									Wait(4500)
+								else
+									exports.pNotify:SendNotification({text = "فروشنده: برو بابا، دیر اومدی نخواه زود برو! قبل تو زرنگ ترهاش مغازه رو زدن، پول نیست!", type = "info", timeout = 4000})
+									Wait(4500)
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+        
     end
 end)
 
