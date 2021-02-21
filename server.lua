@@ -60,8 +60,8 @@ Citizen.CreateThread(function()
 				if (os.time() - Config.Shops[k].lastrobbed) < Config.Shops[k].cooldown and Config.Shops[k].lastrobbed ~= 0 then
 					TriggerClientEvent('master_robbery:pedDead', -1, i)
 				else
-					table.remove(deadPeds, k)
 					TriggerClientEvent('master_robbery:resetStore', -1, k)
+					deadPeds[k] = nil
 				end
 			end 
 		end
