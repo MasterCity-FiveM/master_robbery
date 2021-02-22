@@ -208,10 +208,18 @@ Citizen.CreateThread(function()
             Wait(5000)
         end
     end)
-
+	
     while true do
-        Wait(5)
-		if ESX == nil or ESX.PlayerData == nil or ESX.PlayerData.job == nil or ESX.PlayerData.job.name == nil or (ESX.PlayerData.job.name ~= 'police' and ESX.PlayerData.job.name ~= 'sheriff') then
+		local letSleep = true
+		local pcoords = GetEntityCoords(PlayerPedId())
+	    for i = 1, #Config.Shops do 
+			if GetDistanceBetweenCoords(pcoords, Config.Shops[i].coords.x, Config.Shops[i].coords.y, Config.Shops[i].coords.z, true) < 25.0 then
+				letSleep = false
+			end
+		end
+		
+		if not letSleep and (ESX == nil or ESX.PlayerData == nil or ESX.PlayerData.job == nil or ESX.PlayerData.job.name == nil or (ESX.PlayerData.job.name ~= 'police' and ESX.PlayerData.job.name ~= 'sheriff' and ESX.PlayerData.job.name ~= 'dadsetani')) then
+			Wait(5)
 			local me = PlayerPedId()
 			if IsPedArmed(me, 7) then
 				if IsPlayerFreeAiming(PlayerId()) then
@@ -284,6 +292,8 @@ Citizen.CreateThread(function()
 					end
 				end
 			end
+		else
+            Wait(5000)
 		end
         
     end
