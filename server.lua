@@ -5,6 +5,7 @@ local deadPeds = {}
 
 RegisterServerEvent('master_robbery:pedDead')
 AddEventHandler('master_robbery:pedDead', function(store)
+	ESX.RunCustomFunction("anti_ddos", source, 'master_robbery:pedDead', {store = store})
     if not deadPeds[store] then
         deadPeds[store] = 'deadlol'
 		Config.Shops[store].lastrobbed = os.time()
@@ -14,11 +15,13 @@ end)
 
 RegisterServerEvent('master_robbery:handsUp')
 AddEventHandler('master_robbery:handsUp', function(store)
+	ESX.RunCustomFunction("anti_ddos", source, 'master_robbery:handsUp', {store = store})
     TriggerClientEvent('master_robbery:handsUp', -1, store)
 end)
 
 RegisterServerEvent('master_robbery:pickUp')
 AddEventHandler('master_robbery:pickUp', function(store)
+	ESX.RunCustomFunction("anti_ddos", source, 'master_robbery:pickUp', {store = store})
     local xPlayer = ESX.GetPlayerFromId(source)
     local randomAmount = math.random(Config.Shops[store].money[1], Config.Shops[store].money[2])
     xPlayer.addMoney(randomAmount)
@@ -27,6 +30,7 @@ AddEventHandler('master_robbery:pickUp', function(store)
 end)
 
 ESX.RegisterServerCallback('master_robbery:canRob', function(source, cb, store)
+	ESX.RunCustomFunction("anti_ddos", source, 'master_robbery:canRob', {store = store})
     local cops = 0
 	
 	TriggerEvent('esx_service:GetServiceCount',  function(cops)
@@ -45,6 +49,8 @@ end)
 
 RegisterServerEvent('master_robbery:rob')
 AddEventHandler('master_robbery:rob', function(store)
+	ESX.RunCustomFunction("anti_ddos", source, 'master_robbery:rob', {store = store})
+	ESX.RunCustomFunction("discord", source, 'robstart', 'Shop Robbery', "Store: " .. store)
     local src = source
     local xPlayer = ESX.GetPlayerFromId(src)
 	
