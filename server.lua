@@ -5,7 +5,7 @@ local deadPeds = {}
 
 RegisterServerEvent('master_robbery:pedDead')
 AddEventHandler('master_robbery:pedDead', function(store)
-	ESX.RunCustomFunction("anti_ddos", source, 'master_robbery:pedDead', {store = store})
+	--ESX.RunCustomFunction("anti_ddos", source, 'master_robbery:pedDead', {store = store})
     if not deadPeds[store] then
         deadPeds[store] = 'deadlol'
 		Config.Shops[store].lastrobbed = os.time()
