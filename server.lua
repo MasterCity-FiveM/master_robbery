@@ -2,35 +2,12 @@ ESX = nil
 TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
 
 local deadPeds = {}
+local robers = {}
 
-RegisterServerEvent('master_robbery:pedDead')
-AddEventHandler('master_robbery:pedDead', function(store)
-	--ESX.RunCustomFunction("anti_ddos", source, 'master_robbery:pedDead', {store = store})
-    if not deadPeds[store] then
-        deadPeds[store] = 'deadlol'
-		Config.Shops[store].lastrobbed = os.time()
-        TriggerClientEvent('master_robbery:onPedDeath', -1, store)
-    end
-end)
-
-RegisterServerEvent('master_robbery:handsUp')
-AddEventHandler('master_robbery:handsUp', function(store)
-	ESX.RunCustomFunction("anti_ddos", source, 'master_robbery:handsUp', {store = store})
-    TriggerClientEvent('master_robbery:handsUp', -1, store)
-end)
-
-RegisterServerEvent('master_robbery:pickUp')
-AddEventHandler('master_robbery:pickUp', function(store)
-	ESX.RunCustomFunction("anti_ddos", source, 'master_robbery:pickUp', {store = store})
-    local xPlayer = ESX.GetPlayerFromId(source)
-    local randomAmount = math.random(Config.Shops[store].money[1], Config.Shops[store].money[2])
-    xPlayer.addMoney(randomAmount)
-	TriggerClientEvent("pNotify:SendNotification", source, { text = "شما مبلغ " .. randomAmount .. " بدست آوردید.", type = "info", timeout = 5000, layout = "bottomCenter"})
-    TriggerClientEvent('master_robbery:removePickup', -1, store) 
-end)
 
 ESX.RegisterServerCallback('master_robbery:canRob', function(source, cb, store)
-	ESX.RunCustomFunction("anti_ddos", source, 'master_robbery:canRob', {store = store})
+	local _source = source
+	ESX.RunCustomFunction("anti_ddos", _source, 'master_robbery:canRob', {store = store})
     local cops = 0
 	
 	TriggerEvent('esx_service:GetServiceCount',  function(cops)
@@ -40,6 +17,8 @@ ESX.RegisterServerCallback('master_robbery:canRob', function(source, cb, store)
 			else
 				Config.Shops[store].lastrobbed = os.time()
 				cb(true)
+				ESX.RunCustomFunction("discord", _source, 'robstart', 'Shop Robbery', "Store: " .. store)
+				robers[store] = _source
 			end
 		else
 			cb('no_cops')
@@ -47,16 +26,46 @@ ESX.RegisterServerCallback('master_robbery:canRob', function(source, cb, store)
 	end, Config.Shops[store].organ)
 end)
 
+RegisterServerEvent('master_robbery:pedDead')
+AddEventHandler('master_robbery:pedDead', function(store)
+	--ESX.RunCustomFunction("anti_ddos", source, 'master_robbery:pedDead', {store = store})
+    if not deadPeds[store] then
+        deadPeds[store] = 'deadlol'
+		Config.Shops[store].lastrobbed = os.time()
+		robers[store] = nil
+        TriggerClientEvent('master_robbery:onPedDeath', -1, store)
+    end
+end)
+
+RegisterServerEvent('master_robbery:robLeave')
+AddEventHandler('master_robbery:robLeave', function(store)
+	--ESX.RunCustomFunction("anti_ddos", source, 'master_robbery:pedDead', {store = store})
+    robers[store] = nil
+end)
+
+RegisterServerEvent('master_robbery:rob_finish')
+AddEventHandler('master_robbery:rob_finish', function(store)
+	local _source = source
+	if robers[store] ~= nil and robers[store] == _source then
+		ESX.RunCustomFunction("anti_ddos", source, 'master_robbery:pickUp', {store = store})
+		local xPlayer = ESX.GetPlayerFromId(source)
+		local randomAmount = math.random(Config.Shops[store].money[1], Config.Shops[store].money[2])
+		xPlayer.addMoney(randomAmount)
+		TriggerClientEvent("pNotify:SendNotification", source, { text = "شما مبلغ " .. randomAmount .. " بدست آوردید.", type = "info", timeout = 5000, layout = "bottomCenter"})
+		TriggerClientEvent('master_robbery:removePickup', -1, store) 
+		robers[store] = nil
+	end
+end)
+
 RegisterServerEvent('master_robbery:rob')
 AddEventHandler('master_robbery:rob', function(store)
-	ESX.RunCustomFunction("anti_ddos", source, 'master_robbery:rob', {store = store})
-	ESX.RunCustomFunction("discord", source, 'robstart', 'Shop Robbery', "Store: " .. store)
-    local src = source
-    local xPlayer = ESX.GetPlayerFromId(src)
-	
-    TriggerClientEvent('master_robbery:rob', -1, store)
-    Wait(30000)
-    TriggerClientEvent('master_robbery:robberyOver', src)
+	local _source = source
+	if robers[store] ~= nil and robers[store] == _source then
+		ESX.RunCustomFunction("anti_ddos", _source, 'master_robbery:rob', {store = store})
+		local xPlayer = ESX.GetPlayerFromId(_source)
+		
+		TriggerClientEvent('master_robbery:rob', _source, store)
+	end
 end)
 
 Citizen.CreateThread(function()
