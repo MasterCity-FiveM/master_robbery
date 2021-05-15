@@ -210,7 +210,7 @@ Citizen.CreateThread(function()
 											TriggerServerEvent('master_robbery:pedDead', i)
 											TriggerEvent('master_robbery:msgPolice', Config.Shops[i].organ, 'فروشنده کشته شد!')
 											robbing = false
-										elseif GetDistanceBetweenCoords(GetEntityCoords(me), GetEntityCoords(peds[i]), true) > 9 then
+										elseif GetDistanceBetweenCoords(GetEntityCoords(me), GetEntityCoords(peds[i]), true) > 15 then
 											robbing = false
 											TriggerServerEvent('master_robbery:robLeave', i)
 											TriggerEvent('master_robbery:msgPolice', Config.Shops[i].organ, 'دزد فرار کرد!')
