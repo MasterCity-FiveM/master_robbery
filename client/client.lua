@@ -257,6 +257,8 @@ Citizen.CreateThread(function()
 								else
 									exports.pNotify:SendNotification({text = "تعداد پلیس ها کم می باشد!", type = "error", timeout = 4000})
 								end
+							elseif canRob == 'paintball' then
+								Wait(60000)
 							else
 								exports.pNotify:SendNotification({text = "فروشنده: برو بابا، دیر اومدی نخواه زود برو! قبل تو زرنگ ترهاش مغازه رو زدن، پول نیست!", type = "info", timeout = 4000})
 							end

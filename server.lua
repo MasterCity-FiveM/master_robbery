@@ -9,6 +9,11 @@ ESX.RegisterServerCallback('master_robbery:canRob', function(source, cb, store)
 	local _source = source
 	ESX.RunCustomFunction("anti_ddos", _source, 'master_robbery:canRob', {store = store})
     local cops = 0
+	local xPlayer = ESX.GetPlayerFromId(source)
+	if xPlayer.get('paintball') then
+		cb('paintball')
+		return
+	end
 	
 	TriggerEvent('esx_service:GetServiceCount',  function(cops)
 		if cops >= Config.Shops[store].cops then
